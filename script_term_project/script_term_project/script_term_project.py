@@ -15,11 +15,14 @@ class GetData:
     service = "MetroPerformanceInfo/"
     start_idx = "1/"
     end_idx = "5/"
-    date = "2016-06/"
 
-    url = base_url + key + file_type + service + start_idx + end_idx + date
+    url = base_url + key + file_type + service + start_idx + end_idx
 
-    def GetXMLDataByURL(self):
+    def GetXMLDataByURL(self, date):
+        date += "/"
+
+        self.url += date
+
         data = urllib.request.urlopen(self.url).read()
 
         #print(data)
@@ -53,10 +56,53 @@ def PrintPerformanceInfo():
 
 
 #-------------------------------------------------------------------------#
-# main 함수
-if __name__ == "__main__":
+# 정보 검색 함수
+def SearchPerformanceInfo(sel):
+    os.system('cls')
+
+    print("\n")
+
+    if (sel == 1):
+        date = input("\t날짜 입력 (XXXX-XX) : ")
+
+    elif (sel == 2):
+        date = input("\t날짜 입력 (XXXX-XX/XX) : ")
+
     get_xml_data = GetData()
-    get_xml_data.GetXMLDataByURL()
+    get_xml_data.GetXMLDataByURL(date)
 
     PrintPerformanceInfo()
+
+    input("\t아무 키나 입력하세요. ")
+#-------------------------------------------------------------------------#
+
+
+#-------------------------------------------------------------------------#
+# 메뉴 출력 함수
+def PrintMenu():
+    os.system('cls')
+
+    print("\n")
+    print("\t------------------- ")
+    print("\t1) 월별 검색 ")
+    print("\t2) 일별 검색 ")
+    print("\t3) 종료 ")
+    print("\t------------------- \n")
+#-------------------------------------------------------------------------#
+
+
+#-------------------------------------------------------------------------#
+# main 함수
+if __name__ == "__main__":
+   while (True):
+       PrintMenu()
+       
+       sel = int(input("\t선택: "))
+
+       if (sel == 3):
+           print("\n")
+           break
+
+       if (sel == 1) or (sel == 2):
+           SearchPerformanceInfo(sel)
 #-------------------------------------------------------------------------#
