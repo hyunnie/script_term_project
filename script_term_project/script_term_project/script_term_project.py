@@ -3,6 +3,11 @@
 import urllib.request
 import xml.etree.ElementTree as etree
 import os
+import mimetypes
+import mysmtplib
+
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
 #-------------------------------------------------------------------------#
 
 
@@ -34,10 +39,17 @@ class GetData:
 
 
 #-------------------------------------------------------------------------#
-# 파싱 및 정보 출력 함수
-def PrintPerformanceInfo():
+# 파싱 함수
+def Parse():
     tree = etree.parse("Performance_Info.xml")
-    root = tree.getroot()
+    return tree.getroot()
+#-------------------------------------------------------------------------#
+
+
+#-------------------------------------------------------------------------#
+# 정보 출력 함수
+def PrintPerformanceInfo():
+    root = Parse()
 
     print("\n")
 
@@ -70,10 +82,84 @@ def SearchPerformanceInfo(sel):
 
     get_xml_data = GetData()
     get_xml_data.GetXMLDataByURL(date)
+#-------------------------------------------------------------------------#
 
-    PrintPerformanceInfo()
 
-    input("\t아무 키나 입력하세요. ")
+#-------------------------------------------------------------------------#
+# 이메일 전송 함수
+def SendMail():
+    os.system('cls')
+
+    print("\n")
+    print("\t---------------")
+    print("\t 전송정보 검색")
+    print("\t---------------")
+    print("\t1) 월별 검색 ")
+    print("\t2) 일별 검색 ")
+    print("\t3) 나가기 ")
+    print("\t--------------- \n")
+
+    sel = int(input("\t선택: "))
+
+    if (sel == 3):
+        return
+
+    SearchPerformanceInfo(sel)
+
+    root = Parse()
+
+    f = open("data.txt", "w")
+
+    for data in root.findall("row"):
+        f.write(" ----------------------------------\n")
+        f.write(" 일련번호 : " + data.findtext("PSCHE_SEQ") + "\n")
+        f.write(" 공연자명 : " + data.findtext("NAME") + "\n")
+        f.write(" 공연내용 : " + data.findtext("CMT") + "\n")
+        f.write(" 공연장소 : " + data.findtext("PLACE") + "\n")
+        f.write(" 시작시간 : " + data.findtext("SDATE") + "\n")
+        f.write(" 종료시간 : " + data.findtext("EDATE") + "\n")
+        f.write(" ----------------------------------\n\n")
+
+    f.close()
+
+    # smtp 서버 주소
+    smtp_host = "smtp.test.com"
+
+    # gmail STMP 서버 주소
+    host = "smtp.gmail.com"
+    port = "587"
+    
+    file_name = "data.txt"
+
+    send_addr = "hyunnieyoon@gmail.com"  
+    recv_addr = input("\t받는 사람 : ")
+
+    print("\t이메일 전송 준비 중...")
+    
+    msg = MIMEBase("multipart", "alternative")
+    msg['Subject'] = "Performance Information"
+    msg['From'] = send_addr
+    msg['To'] = recv_addr
+    
+    # MIME 문서를 생성
+    html_fd = open(file_name, "rb")
+    html_part = MIMEText(html_fd.read(), 'html', _charset = 'UTF-8' )
+    html_fd.close()
+    
+    # MIME를 MIMEBase에 첨부
+    msg.attach(html_part)
+
+    print("\t이메일 전송 중...")
+    
+    # 이메일 발송
+    s = mysmtplib.MySMTP(host, port)
+    #s.set_debuglevel(1)        
+    s.ehlo()
+    s.starttls()
+    s.ehlo()
+    s.login("hyunnieyoon@gmail.com", "ekdlfprxm930")
+    s.sendmail(send_addr, [recv_addr], msg.as_string())
+    s.close()
 #-------------------------------------------------------------------------#
 
 
@@ -83,11 +169,12 @@ def PrintMenu():
     os.system('cls')
 
     print("\n")
-    print("\t------------------- ")
+    print("\t---------------")
     print("\t1) 월별 검색 ")
     print("\t2) 일별 검색 ")
-    print("\t3) 종료 ")
-    print("\t------------------- \n")
+    print("\t3) 이메일 전송 ")
+    print("\t9) 종료 ")
+    print("\t---------------\n")
 #-------------------------------------------------------------------------#
 
 
@@ -99,10 +186,16 @@ if __name__ == "__main__":
        
        sel = int(input("\t선택: "))
 
-       if (sel == 3):
+       if (sel == 9):
            print("\n")
            break
 
        if (sel == 1) or (sel == 2):
            SearchPerformanceInfo(sel)
+           PrintPerformanceInfo()
+
+       elif (sel == 3):
+           SendMail()
+
+       input("\n\t아무 키나 입력하세요. ")
 #-------------------------------------------------------------------------#
