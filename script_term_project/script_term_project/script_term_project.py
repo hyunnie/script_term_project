@@ -5,6 +5,7 @@ import xml.etree.ElementTree as etree
 import os
 import mimetypes
 import mysmtplib
+import codecs
 
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -18,17 +19,29 @@ class GetData:
     key = "5a5372614368797534336564624552/"
     file_type = "xml/"
     service = "MetroPerformanceInfo/"
-    start_idx = "1/"
-    end_idx = "5/"
 
-    url = base_url + key + file_type + service + start_idx + end_idx
+    def GetXMLDataAll(self):
+        for i in range(0, 21):
+            start_idx = str(i * 1000 + 1) + "/"
+            end_idx = str((i + 1) * 1000) + "/"
+            
+            url = self.base_url + self.key + self.file_type + self.service + start_idx + end_idx
 
-    def GetXMLDataByURL(self, date):
+            data = urllib.request.urlopen(url).read()
+
+            file_name = "Performance_Info_" + str(i+1) + ".xml"
+
+            f = open(file_name, "wb")
+            f.write(data)
+            f.close()
+
+        
+    def GetXMLDataByDate(self, date = ""):
         date += "/"
 
-        self.url += date
+        url = base_url + key + file_type + service + start_idx + end_idx + date
 
-        data = urllib.request.urlopen(self.url).read()
+        data = urllib.request.urlopen(url).read()
 
         #print(data)
 
@@ -40,8 +53,8 @@ class GetData:
 
 #-------------------------------------------------------------------------#
 # 파싱 함수
-def Parse():
-    tree = etree.parse("Performance_Info.xml")
+def Parse(file_name):
+    tree = etree.parse(file_name)
     return tree.getroot()
 #-------------------------------------------------------------------------#
 
@@ -49,7 +62,7 @@ def Parse():
 #-------------------------------------------------------------------------#
 # 정보 출력 함수
 def PrintPerformanceInfo():
-    root = Parse()
+    root = Parse("Performance_Info.xml")
 
     print("\n")
 
@@ -81,7 +94,7 @@ def SearchPerformanceInfo(sel):
         date = input("\t날짜 입력 (XXXX-XX/XX) : ")
 
     get_xml_data = GetData()
-    get_xml_data.GetXMLDataByURL(date)
+    get_xml_data.GetXMLDataByDate(date)
 #-------------------------------------------------------------------------#
 
 
@@ -142,8 +155,11 @@ def SendMail():
     msg['To'] = recv_addr
     
     # MIME 문서를 생성
-    html_fd = open(file_name, "rb")
-    html_part = MIMEText(html_fd.read(), 'html', _charset = 'UTF-8' )
+    html_fd = open(file_name, "r")
+
+    message = html_fd.read()
+
+    html_part = MIMEText(message, 'html', _charset = 'UTF-8')
     html_fd.close()
     
     # MIME를 MIMEBase에 첨부
@@ -164,6 +180,56 @@ def SendMail():
 
 
 #-------------------------------------------------------------------------#
+# 역 이름으로 검색 함수
+def SearchByStationName():
+    os.system('cls')
+
+    station_name = str(input("\t역 이름 : "))
+
+    for i in range(20, 21):
+        file_name = "Performance_Info_" + str(i + 1) + ".xml"
+        
+        root = Parse(file_name)
+
+        #print("\n")
+
+        for data in root.findall("row"):
+            if (str(data.findtext("PLACE")) == station_name):
+                print("\t----------------------------------")
+                print("\t일련번호 : ", data.findtext("PSCHE_SEQ"))
+                print("\t공연자명 : ", data.findtext("NAME"))
+                print("\t공연내용 : ", data.findtext("CMT"))
+                print("\t공연장소 : ", data.findtext("PLACE"))
+                print("\t시작시간 : ", data.findtext("SDATE"))
+                print("\t종료시간 : ", data.findtext("EDATE"))
+                print("\t----------------------------------")
+
+        #print("\n")
+#-------------------------------------------------------------------------#
+
+
+#-------------------------------------------------------------------------#
+# 공연 빈도 확인 함수
+def SearchPerformanceCount():
+    os.system('cls')
+
+    d = dict()
+
+    get_xml_data = GetData()
+    get_xml_data.GetXMLDataByDate()
+
+    root = Parse()
+
+    a = 0
+
+    for data in root.findall("row"):
+        a += 1
+
+    print(a)
+#-------------------------------------------------------------------------#
+
+
+#-------------------------------------------------------------------------#
 # 메뉴 출력 함수
 def PrintMenu():
     os.system('cls')
@@ -172,7 +238,9 @@ def PrintMenu():
     print("\t---------------")
     print("\t1) 월별 검색 ")
     print("\t2) 일별 검색 ")
-    print("\t3) 이메일 전송 ")
+    print("\t3) 역 이름으로 검색 ")
+    print("\t4) 이메일 전송 ")
+    print("\t5) 역별 공연빈도 보기 ")
     print("\t9) 종료 ")
     print("\t---------------\n")
 #-------------------------------------------------------------------------#
@@ -195,7 +263,13 @@ if __name__ == "__main__":
            PrintPerformanceInfo()
 
        elif (sel == 3):
+           SearchByStationName()
+
+       elif (sel == 4):
            SendMail()
+
+       elif (sel == 5):
+           SearchPerformanceCount()
 
        input("\n\t아무 키나 입력하세요. ")
 #-------------------------------------------------------------------------#

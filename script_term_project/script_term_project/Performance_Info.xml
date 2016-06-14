@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?><MetroPerformanceInfo>
-<list_total_count>2</list_total_count>
+<list_total_count>80</list_total_count>
 <RESULT>
 <CODE>INFO-000</CODE>
 <MESSAGE>정상 처리되었습니다</MESSAGE>
 </RESULT>
+<row>
+<PSCHE_SEQ>36627</PSCHE_SEQ>
+<NAME>이훈주</NAME>
+<CMT><![CDATA[인디(보컬)]]></CMT>
+<PLACE>사당역</PLACE>
+<SDATE>2016-06-02 17:00</SDATE>
+<EDATE>2016-06-02 18:00</EDATE>
+</row>
+<row>
+<PSCHE_SEQ>36628</PSCHE_SEQ>
+<NAME>크림파스타</NAME>
+<CMT><![CDATA[인디밴드]]></CMT>
+<PLACE>동대문역사문화공원역</PLACE>
+<SDATE>2016-06-02 19:00</SDATE>
+<EDATE>2016-06-02 21:00</EDATE>
+</row>
 <row>
 <PSCHE_SEQ>36629</PSCHE_SEQ>
 <NAME>라파엘</NAME>
@@ -19,5 +35,13 @@
 <PLACE>선릉역</PLACE>
 <SDATE>2016-06-03 18:00</SDATE>
 <EDATE>2016-06-03 20:00</EDATE>
+</row>
+<row>
+<PSCHE_SEQ>36633</PSCHE_SEQ>
+<NAME>원템포</NAME>
+<CMT><![CDATA[클래식(기악)]]></CMT>
+<PLACE>선릉역</PLACE>
+<SDATE>2016-06-04 16:00</SDATE>
+<EDATE>2016-06-04 18:00</EDATE>
 </row>
 </MetroPerformanceInfo>
