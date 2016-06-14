@@ -188,9 +188,18 @@ def SearchByStationName():
     os.system('cls')
 
     station_name = str(input("\t역 이름 : "))
+    date = str(input("\t날짜 (XXXX-XX) : "))
 
     for i in range(20, 21):
-        file_name = "Performance_Info_" + str(i + 1) + ".xml"
+        file_name = ""
+
+        if (date == ""):
+            file_name = "Performance_Info_" + str(i + 1) + ".xml"
+        else:
+            get_xml_data = GetData()
+            get_xml_data.GetXMLDataByDate(date)
+
+            file_name = "Performance_Info.xml"
         
         root = Parse(file_name)
 
