@@ -37,9 +37,12 @@ class GetData:
 
         
     def GetXMLDataByDate(self, date = ""):
-        date += "/"
+        start_idx = "1/"
+        end_idx = "100/"
 
-        url = base_url + key + file_type + service + start_idx + end_idx + date
+        date += "/"
+        
+        url = self.base_url + self.key + self.file_type + self.service + start_idx + end_idx + date
 
         data = urllib.request.urlopen(url).read()
 
@@ -119,7 +122,7 @@ def SendMail():
 
     SearchPerformanceInfo(sel)
 
-    root = Parse()
+    root = Parse("Performance_Info.xml")
 
     f = open("data.txt", "w")
 
@@ -147,7 +150,7 @@ def SendMail():
     send_addr = "hyunnieyoon@gmail.com"  
     recv_addr = input("\t받는 사람 : ")
 
-    print("\t이메일 전송 준비 중...")
+    print("\n\t이메일 전송 준비 중...")
     
     msg = MIMEBase("multipart", "alternative")
     msg['Subject'] = "Performance Information"
@@ -155,7 +158,7 @@ def SendMail():
     msg['To'] = recv_addr
     
     # MIME 문서를 생성
-    html_fd = open(file_name, "r")
+    html_fd = open(file_name, "rb")
 
     message = html_fd.read()
 
@@ -191,8 +194,6 @@ def SearchByStationName():
         
         root = Parse(file_name)
 
-        #print("\n")
-
         for data in root.findall("row"):
             if (str(data.findtext("PLACE")) == station_name):
                 print("\t----------------------------------")
@@ -203,8 +204,6 @@ def SearchByStationName():
                 print("\t시작시간 : ", data.findtext("SDATE"))
                 print("\t종료시간 : ", data.findtext("EDATE"))
                 print("\t----------------------------------")
-
-        #print("\n")
 #-------------------------------------------------------------------------#
 
 
@@ -213,19 +212,54 @@ def SearchByStationName():
 def SearchPerformanceCount():
     os.system('cls')
 
-    d = dict()
+    print("\n\t공연빈도 계산 중...")
+    
+    d = {"zzz":0}
 
-    get_xml_data = GetData()
-    get_xml_data.GetXMLDataByDate()
+    for i in range(0, 21):
+        file_name = "Performance_Info_" + str(i + 1) + ".xml"
 
-    root = Parse()
+        root = Parse(file_name)
 
-    a = 0
+        for data in root.findall("row"):
+            station_name = data.findtext("PLACE")
+            
+            check = False
 
-    for data in root.findall("row"):
-        a += 1
+            for i in d.keys():
+                if (i == station_name):
+                    check = True
+                    break
 
-    print(a)
+            if (check == True):
+                d[station_name] += 1
+            else:
+                d[station_name] = 0
+
+    most = 0
+    snd = 0
+    trd = 0
+
+    first = ""
+    second = ""
+    third = ""
+    
+    for key in d.keys():
+        if (most < d[key]):
+            most = d[key]
+            first = key
+
+        if (snd < d[key] < most):
+            snd = d[key]
+            second = key
+
+        if (trd < d[key] < snd):
+            trd = d[key]
+            third = key
+
+    print("\n\t1위) " + first)
+    print("\t2위) " + second)
+    print("\t3위) " + third)
 #-------------------------------------------------------------------------#
 
 
@@ -249,6 +283,10 @@ def PrintMenu():
 #-------------------------------------------------------------------------#
 # main 함수
 if __name__ == "__main__":
+
+   #get_xml_data = GetData()
+   #get_xml_data.GetXMLDataAll()
+
    while (True):
        PrintMenu()
        
